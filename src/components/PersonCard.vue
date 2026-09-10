@@ -57,6 +57,9 @@ const formatDate = (iso) => {
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
   width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
 }
 
 .card:hover {
@@ -76,14 +79,16 @@ const formatDate = (iso) => {
 }
 
 .card-image {
-  width: 110px;
-  height: 110px;
+  width: clamp(80px, 30vw, 110px);
+  height: clamp(80px, 30vw, 110px);
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--image-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  margin: 0 auto;
 }
 
 .card-image img {
@@ -93,7 +98,7 @@ const formatDate = (iso) => {
 }
 
 .no-image {
-  font-size: 48px;
+  font-size: clamp(28px, 10vw, 48px);
   font-weight: bold;
   color: var(--accent);
 }
@@ -101,22 +106,35 @@ const formatDate = (iso) => {
 .card-info {
   text-align: center;
   width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: clamp(16px, 4vw, 18px);
   color: var(--text-h);
   text-transform: capitalize;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
 }
 
 .where {
   margin: 4px 0 0;
   font-size: 13px;
   color: var(--text-muted);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
 }
 
 .when {
@@ -124,6 +142,8 @@ h3 {
   font-size: 12px;
   color: var(--text-muted);
   font-family: var(--mono);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .contacts-hint {
@@ -138,6 +158,8 @@ h3 {
   justify-content: center;
   margin-top: 10px;
   flex-wrap: wrap;
+  width: 100%;
+  min-width: 0;
 }
 
 .badge {
@@ -148,9 +170,23 @@ h3 {
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 .badge.tag {
   outline: 1px dashed rgba(255,255,255,0.6);
   outline-offset: -2px;
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 16px 12px;
+    gap: 10px;
+  }
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
 }
 </style>

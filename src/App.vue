@@ -319,4 +319,51 @@ h1 {
   color: var(--text-muted);
   padding: 48px 0;
 }
+
+@media (max-width: 380px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 381px) and (max-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 20px 16px;
+  }
+  h1 {
+    font-size: clamp(28px, 8vw, 40px);
+  }
+  .toolbar {
+    gap: 8px;
+  }
+  .search {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+  .select {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+  .select.date {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .btn.add {
+    width: 100%;
+  }
+  .toolbar.secondary {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .hint {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
 </style>

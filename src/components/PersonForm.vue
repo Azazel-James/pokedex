@@ -220,10 +220,33 @@ textarea:focus {
 .row {
     display: flex;
     gap: 12px;
+    min-width: 0;
 }
 
 .row label {
     flex: 1;
+    min-width: 0;
+}
+
+input,
+textarea {
+    min-width: 0;
+    width: 100%;
+}
+
+@media (max-width: 480px) {
+    .row {
+        flex-direction: column;
+    }
+    .modal {
+        padding: 20px 16px;
+    }
+    .overlay {
+        padding: 16px;
+    }
+    h2 {
+        font-size: 20px;
+    }
 }
 
 fieldset {

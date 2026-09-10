@@ -99,12 +99,56 @@ const formatDate = (iso) => {
   border-radius: 16px;
   padding: 28px;
   box-shadow: var(--shadow);
+  min-width: 0;
 }
 
 @media (max-width: 640px) {
   .detail {
     flex-direction: column;
     text-align: center;
+    align-items: center;
+    padding: 20px 16px;
+  }
+  .detail-image {
+    margin: 0 auto;
+    width: 140px;
+    height: 140px;
+    min-width: 140px;
+  }
+  .head {
+    justify-content: center;
+  }
+  .badges {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .overlay {
+    padding: 16px;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+  .detail {
+    padding: 16px;
+    gap: 16px;
+  }
+  .detail-image {
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+  }
+  .meta {
+    flex-direction: column;
+  }
+  .meta-item {
+    width: 100%;
+  }
+  .notes {
+    font-size: 14px;
+  }
+  .actions .btn {
+    flex: 1 1 100%;
   }
 }
 
@@ -130,6 +174,8 @@ const formatDate = (iso) => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 .detail-image img {
@@ -149,6 +195,8 @@ const formatDate = (iso) => {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
+  width: 100%;
 }
 
 .head {
@@ -157,6 +205,7 @@ const formatDate = (iso) => {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .fav {
@@ -172,6 +221,7 @@ const formatDate = (iso) => {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .badge {
@@ -182,6 +232,8 @@ const formatDate = (iso) => {
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .badge.tag {
   outline: 1px dashed rgba(255,255,255,0.7);
@@ -191,13 +243,16 @@ const formatDate = (iso) => {
 h2 {
   margin: 0;
   color: var(--text-h);
-  font-size: 28px;
+  font-size: clamp(22px, 6vw, 28px);
   text-transform: capitalize;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .meta {
   display: flex;
   gap: 12px;
+  min-width: 0;
 }
 
 .meta-item {
@@ -209,6 +264,7 @@ h2 {
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  min-width: 0;
 }
 
 .meta-label {
@@ -223,12 +279,22 @@ h2 {
   color: var(--text-h);
   font-size: 14px;
   text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .contacts {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+@media (max-width: 640px) {
+  .contacts {
+    justify-content: center;
+  }
 }
 
 .contact {
@@ -240,6 +306,9 @@ h2 {
   border-radius: 999px;
   text-decoration: none;
   border: 1px solid transparent;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  min-width: 0;
 }
 
 .contact:hover {
@@ -250,6 +319,8 @@ h2 {
   color: var(--text);
   line-height: 1.5;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .empty-notes {
