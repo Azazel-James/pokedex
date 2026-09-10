@@ -7,11 +7,16 @@ defineProps({
 
 defineEmits(['close', 'edit', 'remove', 'toggleFavorite'])
 
-const formatDate = (iso) => {
-  if (!iso) return '—'
-  try {
-    return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-  } catch { return iso }
+const formatDate = (v) => {
+  if (!v) return '—'
+  const s = String(v).trim()
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s) || /^\d{2}\/\d{4}$/.test(s)) return s
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    try { return new Date(s).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) } catch { return s }
+  }
+  // Tolère aussi sans zéros initiaux (ex: 4/2024)
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s) || /^\d{1,2}\/\d{4}$/.test(s)) return s
+  return s
 }
 </script>
 

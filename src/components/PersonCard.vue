@@ -7,11 +7,16 @@ defineProps({
 
 defineEmits(['select'])
 
-const formatDate = (iso) => {
-  if (!iso) return ''
-  try {
-    return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
-  } catch { return iso }
+const formatDate = (v) => {
+  if (!v) return ''
+  const s = String(v).trim()
+  // JJ/MM/AAAA ou MM/AAAA : afficher tel quel (compact)
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s) || /^\d{2}\/\d{4}$/.test(s)) return s
+  // Legacy ISO AAAA-MM-JJ
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    try { return new Date(s).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) } catch { return s }
+  }
+  return s
 }
 </script>
 

@@ -24,7 +24,46 @@ const emptyForm = () => ({
 const form = reactive(emptyForm());
 const fileInput = ref(null);
 const fileError = ref("");
+const dateError = ref("");
 const isDataUrl = (v) => typeof v === "string" && v.startsWith("data:image");
+
+// Accepte "", "MM/AAAA" et "JJ/MM/AAAA" (+ legacy ISO "AAAA-MM-JJ")
+const normalizeDateMet = (raw) => {
+  const v = String(raw || "").trim();
+  if (!v) return "";
+  // déjà MM/AAAA ?
+  let m = v.match(/^(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const mm = String(m[1]).padStart(2, "0");
+    const yyyy = m[2];
+    const month = Number(mm);
+    if (month < 1 || month > 12) return null;
+    return `${mm}/${yyyy}`;
+  }
+  // JJ/MM/AAAA ?
+  m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const dd = String(m[1]).padStart(2, "0");
+    const mm = String(m[2]).padStart(2, "0");
+    const yyyy = m[3];
+    const d = Number(dd), mo = Number(mm);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    // validation jour/mois via Date
+    const dt = new Date(Number(yyyy), mo - 1, d);
+    if (dt.getFullYear() !== Number(yyyy) || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  // ISO legacy AAAA-MM-JJ -> convertir en JJ/MM/AAAA pour stockage
+  m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const yyyy = m[1], mm = m[2], dd = m[3];
+    // réutilise la même validation
+    const dt = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+    if (dt.getFullYear() !== Number(yyyy) || dt.getMonth() !== Number(mm) - 1 || dt.getDate() !== Number(dd)) return null;
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  return null;
+};
 
 watch(
     () => props.person,
@@ -39,6 +78,7 @@ watch(
             Object.assign(form, emptyForm());
         }
         fileError.value = "";
+        dateError.value = "";
         if (fileInput.value) fileInput.value.value = "";
     },
     { immediate: true }
@@ -94,11 +134,23 @@ const clearPhoto = () => {
 
 const submit = () => {
     if (!form.name.trim()) return;
+    const rawDate = String(form.dateMet || "").trim();
+    if (rawDate) {
+      const norm = normalizeDateMet(rawDate);
+      if (norm === null) {
+        dateError.value = "Format attendu : JJ/MM/AAAA ou MM/AAAA (ex: 12/04/2024 ou 04/2024).";
+        return;
+      }
+      form.dateMet = norm;
+      dateError.value = "";
+    } else {
+      dateError.value = "";
+    }
     emit("save", {
         name: form.name.trim(),
         photo: form.photo.trim(),
         whereMet: form.whereMet.trim(),
-        dateMet: form.dateMet,
+        dateMet: String(form.dateMet || "").trim(),
         phone: form.phone.trim(),
         email: form.email.trim(),
         notes: form.notes.trim(),
@@ -146,7 +198,16 @@ const submit = () => {
                 </label>
                 <label>
                     Quand ?
-                    <input v-model="form.dateMet" type="date" />
+                    <input
+                      v-model.trim="form.dateMet"
+                      type="text"
+                      inputmode="numeric"
+                      placeholder="JJ/MM/AAAA ou MM/AAAA"
+                      pattern="^(\d{1,2}/\d{4}|\d{1,2}/\d{1,2}/\d{4})?$"
+                      @blur="dateError && (dateError = normalizeDateMet(form.dateMet) === null && form.dateMet.trim() ? 'Format attendu : JJ/MM/AAAA ou MM/AAAA.' : '')"
+                    />
+                    <span v-if="dateError" class="error">{{ dateError }}</span>
+                    <span v-else class="hint">ex: 12/04/2024 ou 04/2024</span>
                 </label>
             </div>
 

@@ -14,7 +14,22 @@ const search = ref('')
 const filterType = ref('')
 const filterTag = ref('')
 const filterFavorite = ref('all')
-const filterWhen = ref('') // specific date filter
+const filterWhen = ref('') // filtre texte sur date (JJ/MM/AAAA ou MM/AAAA)
+
+const toIsoForSort = (v) => {
+  const s = String(v || '').trim()
+  if (!s) return ''
+  // ISO legacy
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`
+  // JJ/MM/AAAA
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if (m) return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`
+  // MM/AAAA
+  m = s.match(/^(\d{1,2})\/(\d{4})$/)
+  if (m) return `${m[2]}-${String(m[1]).padStart(2,'0')}-01`
+  return ''
+}
 
 const showForm = ref(false)
 const editingPerson = ref(null)
@@ -29,6 +44,7 @@ const filtered = computed(() => {
       (p.notes && p.notes.toLowerCase().includes(q)) ||
       (p.phone && p.phone.toLowerCase().includes(q)) ||
       (p.email && p.email.toLowerCase().includes(q)) ||
+      (p.dateMet && String(p.dateMet).toLowerCase().includes(q)) ||
       (p.tags || []).some(t => t.toLowerCase().includes(q)) ||
       (p.types || []).some(t => t.toLowerCase().includes(q))
     const matchesType = !filterType.value || (p.types || []).includes(filterType.value)
@@ -37,13 +53,15 @@ const filtered = computed(() => {
       filterFavorite.value === 'all' ||
       (filterFavorite.value === 'fav' && p.favorite) ||
       (filterFavorite.value === 'other' && !p.favorite)
-    const matchesWhen = !filterWhen.value || p.dateMet === filterWhen.value
+    const qWhen = filterWhen.value.trim().toLowerCase()
+    const matchesWhen = !qWhen || String(p.dateMet || '').toLowerCase().includes(qWhen)
     return matchesSearch && matchesType && matchesTag && matchesFavorite && matchesWhen
   }).sort((a, b) => {
-    // Recent first if date exists, else name
-    if (a.dateMet && b.dateMet) return b.dateMet.localeCompare(a.dateMet)
-    if (a.dateMet) return -1
-    if (b.dateMet) return 1
+    const aIso = toIsoForSort(a.dateMet)
+    const bIso = toIsoForSort(b.dateMet)
+    if (aIso && bIso) return bIso.localeCompare(aIso)
+    if (aIso) return -1
+    if (bIso) return 1
     return a.name.localeCompare(b.name)
   })
 })
@@ -132,7 +150,7 @@ const onFilePicked = async (e) => {
         <option value="fav">Favoris</option>
         <option value="other">Autres</option>
       </select>
-      <input v-model="filterWhen" type="date" class="select date" title="Filtrer par date de rencontre" />
+      <input v-model="filterWhen" type="text" inputmode="numeric" placeholder="Filtrer date (JJ/MM/AAAA ou MM/AAAA)" class="select date" title="Filtrer par date de rencontre" />
       <button class="btn add" @click="openNew">+ Ajouter</button>
     </div>
 
