@@ -408,9 +408,21 @@ legend {
 .checkbox {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 6px;
     font-size: 14px;
     color: var(--text-h);
+    cursor: pointer;
+    width: fit-content;
+}
+
+.checkbox input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
 }
 
 .actions {
