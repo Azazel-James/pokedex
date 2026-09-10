@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch } from "vue";
+import { reactive, watch, ref } from "vue";
 import { TYPES, TAGS } from "../types.js";
 
 const props = defineProps({
@@ -22,6 +22,9 @@ const emptyForm = () => ({
 });
 
 const form = reactive(emptyForm());
+const fileInput = ref(null);
+const fileError = ref("");
+const isDataUrl = (v) => typeof v === "string" && v.startsWith("data:image");
 
 watch(
     () => props.person,
@@ -35,6 +38,8 @@ watch(
         } else {
             Object.assign(form, emptyForm());
         }
+        fileError.value = "";
+        if (fileInput.value) fileInput.value.value = "";
     },
     { immediate: true }
 );
@@ -55,6 +60,36 @@ const toggleTag = (tag) => {
     } else {
         if (form.tags.length > 1) form.tags.splice(index, 1);
     }
+};
+
+const onFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    fileError.value = "";
+    if (!file.type.startsWith("image/")) {
+        fileError.value = "Seules les images sont acceptées.";
+        e.target.value = "";
+        return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+        fileError.value = "Image trop lourde (max 2 Mo).";
+        e.target.value = "";
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+        form.photo = String(reader.result);
+    };
+    reader.onerror = () => {
+        fileError.value = "Erreur lecture fichier.";
+    };
+    reader.readAsDataURL(file);
+};
+
+const clearPhoto = () => {
+    form.photo = "";
+    fileError.value = "";
+    if (fileInput.value) fileInput.value.value = "";
 };
 
 const submit = () => {
@@ -87,7 +122,22 @@ const submit = () => {
             <label>
                 Photo (URL)
                 <input v-model.trim="form.photo" type="url" placeholder="https://..." />
+                <span class="hint">ou depuis ton appareil</span>
             </label>
+
+            <div class="photo-upload">
+                <div class="photo-preview" :class="{ empty: !form.photo }">
+                    <img v-if="form.photo" :src="form.photo" alt="Aperçu" @error="fileError = 'URL invalide ou image inaccessible.'" />
+                    <span v-else class="preview-placeholder">Aucune photo</span>
+                </div>
+                <div class="photo-actions">
+                    <input ref="fileInput" type="file" accept="image/*" capture="environment" hidden @change="onFileChange" />
+                    <button type="button" class="btn secondary small" @click="fileInput?.click()">📁 Choisir un fichier</button>
+                    <button v-if="form.photo" type="button" class="btn secondary small danger" @click="clearPhoto">✕ Retirer</button>
+                </div>
+                <p v-if="isDataUrl(form.photo)" class="hint">Image stockée localement (base64, ~{{ Math.round(form.photo.length / 1024) }} Ko)</p>
+                <p v-if="fileError" class="error">{{ fileError }}</p>
+            </div>
 
             <div class="row">
                 <label>
@@ -285,6 +335,74 @@ legend {
     background: var(--accent-bg);
     color: var(--accent);
     font-weight: 600;
+}
+
+.hint {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.photo-upload {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    background: var(--image-bg);
+}
+
+.photo-preview {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+}
+
+.photo-preview.empty {
+    border-style: dashed;
+}
+
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-placeholder {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.photo-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn.small {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.btn.small.danger {
+    color: #e0245e;
+    border-color: rgba(224,36,94,0.3);
+}
+
+.error {
+    font-size: 12px;
+    color: #e0245e;
+    margin: 0;
+    text-align: center;
 }
 
 .checkbox {
